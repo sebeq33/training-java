@@ -1,27 +1,62 @@
 package service;
 
-import java.sql.SQLException;
 import java.util.List;
 
-import mapper.pages.Page;
 import model.Company;
-import persistence.CompanyDao;
+import model.pages.Page;
+import persistence.CompanyDaoImpl;
+import persistence.exceptions.DaoException;
 
 public class CompanyServiceImpl {
 
-	private static final CompanyDao companyDao = CompanyDao.getInstance();
+    private static CompanyServiceImpl instance;
+    private CompanyDaoImpl companyDao;
 
-	public List<Company> getCompanyList() throws SQLException {
-		return companyDao.getCompanyList();
-	}
+    /**
+     * Private ctor.
+     * @param dao CompanyDao to access Data
+     */
+    private CompanyServiceImpl(CompanyDaoImpl dao) {
+        companyDao = dao;
+    }
 
-	public boolean companyExists(Long idCompany) throws SQLException {
-		return companyDao.companyExists(idCompany);
-	}
+    /**
+     * @return a loaded Service, ready to work
+     */
+    public static CompanyServiceImpl getInstance() {
+        if (instance == null) {
+            instance = new CompanyServiceImpl(CompanyDaoImpl.getInstance());
+        }
+        return instance;
+    }
 
-	public Page<Company> getCompanyPage() throws SQLException {
-		
-		return companyDao.getCompanyPage();
-	}
+    /**
+     * @return Full company list from DB
+     * @throws DaoException content couldn't be loaded
+     */
+    public List<Company> getCompanyList() throws DaoException {
+        return companyDao.getCompanyList();
+    }
+
+    /**
+     * @param idCompany idCompany the id to check
+     * @return true is company id is present in DB
+     * @throws DaoException content couldn't be loaded
+     */
+    public boolean companyExists(Long idCompany) throws DaoException {
+        if (idCompany == null) {
+            throw new NullPointerException();
+        }
+        return companyDao.companyExists(idCompany);
+    }
+
+    /**
+     * @return the first page of the full company list from DB
+     * @throws DaoException content couldn't be loaded
+     */
+    public Page<Company> getCompanyPage() throws DaoException {
+
+        return companyDao.getCompanyPage();
+    }
 
 }
