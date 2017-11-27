@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:aop="http://www.springframework.org/schema/aop"
+	xmlns:tx="http://www.springframework.org/schema/tx"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans
+    http://www.springframework.org/schema/beans/spring-beans-2.0.xsd
+    http://www.springframework.org/schema/aop
+    http://www.springframework.org/schema/aop/spring-aop-2.0.xsd
+    http://www.springframework.org/schema/tx
+    http://www.springframework.org/schema/tx/spring-tx-2.0.xsd">
+
+	<!-- #### SERVICES #########################################-->
+	<bean id="companyService" class="service.impl.CompanyService"
+		lazy-init="true">
+		<constructor-arg>
+			<ref bean="companyDao" />
+		</constructor-arg>
+		<constructor-arg>
+			<ref bean="computerService" />
+		</constructor-arg>
+	</bean>
+	<bean id="computerService" class="service.impl.ComputerService"
+		lazy-init="true">
+		<constructor-arg>
+			<ref bean="computerDao" />
+		</constructor-arg>
+	</bean>
+
+
+
+	<!-- #### DAOs ######################################### -->
+	<bean id="companyDao" class="persistence.impl.CompanyDao">
+		<constructor-arg>
+			<ref bean="daoConnection" />
+		</constructor-arg>
+	</bean>
+	<bean id="computerDao" class="persistence.impl.ComputerDao">
+		<constructor-arg>
+			<ref bean="daoConnection" />
+		</constructor-arg>
+	</bean>
+
+
+
+	<!-- #### DaoConnection ######################################### -->
+	<bean id="daoConnection" class="persistence.DaoConnection">
+		<constructor-arg>
+			<ref bean="dataSource" />
+		</constructor-arg>
+	</bean>
+	
+	
+
+	<!-- #### TRANSACTIONS ######################################### -->
+	<aop:config>
+		<aop:pointcut id="computerServiceOperation" expression="execution(* service.IComputerService.*(..))" />
+		<aop:pointcut id="companyServiceOperation" expression="execution(* service.ICompanyService.*(..))" />
+		<aop:advisor advice-ref="defaultAdvice" pointcut-ref="computerServiceOperation" />
+		<aop:advisor advice-ref="txAdvice" pointcut-ref="companyServiceOperation" />
+	</aop:config>
+
+	<tx:advice id="txAdvice" transaction-manager="txManager">
+		<tx:attributes>
+			<!-- all methods starting with 'get' are read-only -->
+			<tx:method name="get*" read-only="true" />
+			<tx:method name="delete*" isolation="DEFAULT" rollback-for="java.sql.SQLException;"/>
+			<tx:method name="*" />
+		</tx:attributes>
+	</tx:advice>
+	<tx:advice id="defaultAdvice" transaction-manager="txManager">
+		<tx:attributes>
+			<tx:method name="get*" read-only="true" />
+			<tx:method name="*" />
+		</tx:attributes>
+	</tx:advice>
+
+	<bean id="txManager"
+		class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+		<property name="dataSource" ref="dataSource" />
+	</bean>
+
+
+
+	<!-- #### HikariCP configuration ######################################### -->
+	<bean
+		class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
+		<property name="location" value="classpath:config.properties" />
+	</bean>
+
+	<bean id="hikariConfig" class="com.zaxxer.hikari.HikariConfig">
+		<property name="poolName" value="springHikariCP" />
+		<property name="connectionTestQuery" value="SELECT 1" />
+		<property name="driverClassName" value="${driverClassName}" />
+		<property name="maximumPoolSize" value="${maximumPoolSize}" />
+		<property name="jdbcUrl" value="${jdbcUrl}" />
+
+		<property name="dataSourceProperties">
+			<props>
+				<prop key="user">${dataSource.user}</prop>
+				<prop key="password">${dataSource.password}</prop>
+				<prop key="cachePrepStmts">${dataSource.cachePrepStmts}</prop>
+				<prop key="prepStmtCacheSize">${dataSource.prepStmtCacheSize}</prop>
+				<prop key="prepStmtCacheSqlLimit">${dataSource.prepStmtCacheSqlLimit}</prop>
+			</props>
+		</property>
+	</bean>
+
+	<!-- HIKARI Datasource (connection pool) -->
+	<bean id="dataSource" class="com.zaxxer.hikari.HikariDataSource"
+		destroy-method="close">
+		<constructor-arg ref="hikariConfig" />
+	</bean>
+</beans>

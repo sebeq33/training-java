@@ -1,11 +1,11 @@
 package model.pages;
 
+import java.sql.SQLException;
 import java.util.List;
 
 import mapper.ComputerMapping;
-import persistence.exceptions.DaoException;
 import persistence.querycommands.PageQuery;
-import service.PageBuilder;
+import service.PageRequest;
 
 public class Page<T> {
 
@@ -26,7 +26,7 @@ public class Page<T> {
      * @param total total of elem
      * @param pageBuilder builder
      */
-    public Page(PageQuery<T> pageQuery, Long total, PageBuilder<T> pageBuilder) {
+    public Page(PageQuery<T> pageQuery, Long total, PageRequest<T> pageBuilder) {
         this(pageQuery, total);
         this.nbPage = pageBuilder.getNbPage();
         this.pageSize = pageBuilder.getPageSize();
@@ -78,9 +78,9 @@ public class Page<T> {
     /**
      * @return return the current page loaded if it wasn't, else return the next
      *         page
-     * @throws DaoException page couldn't be loaded
+     * @throws SQLException page couldn't be loaded
      */
-    public Page<T> next() throws DaoException {
+    public Page<T> next() throws SQLException {
         if (!isLoaded()) {
             return this.load();
         }
@@ -91,9 +91,9 @@ public class Page<T> {
 
     /**
      * @return current page with loaded content
-     * @throws DaoException PageException page couldn't be loaded
+     * @throws SQLException PageException page couldn't be loaded
      */
-    public Page<T> load() throws DaoException {
+    public Page<T> load() throws SQLException {
         content = command.getContent(this);
         return this;
     }

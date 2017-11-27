@@ -4,39 +4,43 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.springframework.web.context.WebApplicationContext;
+import org.springframework.web.context.support.WebApplicationContextUtils;
 
 import model.Computer;
 import model.pages.Page;
-import service.CompanyServiceImpl;
-import service.ComputerServiceImpl;
 import service.ICompanyService;
 import service.IComputerService;
-import service.PageBuilder;
+import service.PageRequest;
 import validators.ValidationUtils;
 
 @WebServlet
 public class Dashboard extends HttpServlet {
     private static final String DASHBOARD_JSP_PATH = "/WEB-INF/pages/dashboard.jsp";
     private static final long serialVersionUID = 1L;
-    private static final Logger LOGGER = LoggerFactory.getLogger(Dashboard.class);
 
     private IComputerService computerService;
     private ICompanyService companyService;
 
     /**
-     * Default constructor.
+     * @param config ServletConfig
+     * @see javax.servlet.GenericServlet#init(javax.servlet.ServletConfig)
+     * @throws ServletException exception
      */
-    public Dashboard() {
-        computerService = ComputerServiceImpl.getInstance();
-        companyService = CompanyServiceImpl.getInstance();
+    @Override
+    public void init(ServletConfig config) throws ServletException {
+        super.init(config);
+
+        WebApplicationContext wc = WebApplicationContextUtils.getWebApplicationContext(getServletContext());
+        this.companyService = (ICompanyService) wc.getBean("companyService");
+        this.computerService = (IComputerService) wc.getBean("computerService");
     }
 
     /**
@@ -87,7 +91,6 @@ public class Dashboard extends HttpServlet {
             companyService.delete(Long.parseLong(id));
             String msg = "Sucessfully deleted company : n°" + id;
             RequestUtils.showMsg(req, true, msg);
-            LOGGER.info(msg);
         }
     }
 
@@ -106,7 +109,7 @@ public class Dashboard extends HttpServlet {
         Boolean result = ValidationUtils.isLongList(computerSelection, ids);
 
         if (result) {
-            computerService.deleteComputers(ids);
+            computerService.delete(ids);
             RequestUtils.showMsg(req, true, "Success, " + ids.size() + " computer ids deleted");
             req.setAttribute("page", 1);
         } else {
@@ -122,7 +125,7 @@ public class Dashboard extends HttpServlet {
      */
     private void loadDashboard(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
 
-        PageBuilder<Computer> builder = new PageBuilder<Computer>();
+        PageRequest<Computer> builder = new PageRequest<Computer>();
         Page<Computer> page = computerService.loadPage(builder.with(req));
 
         if (page != null) {
