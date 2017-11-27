@@ -2,41 +2,42 @@ package service;
 
 import java.util.List;
 
-import mapper.pages.Page;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import model.Computer;
-import model.ComputerPreview;
-import persistence.ComputerDao;
+import model.pages.Page;
+import persistence.ComputerDaoImpl;
 import persistence.exceptions.DaoException;
+import persistence.querycommands.PageQuery;
 
-public class ComputerServiceImpl {
+public class ComputerServiceImpl implements IComputerService {
 
-    private static ComputerServiceImpl instance;
-    private ComputerDao                computerDao;
+    private static final Logger     LOGGER = LoggerFactory.getLogger(ComputerServiceImpl.class);
+    private static IComputerService instance;
+    private ComputerDaoImpl         computerDao;
 
     /**
      * Private ctor.
+     *
      * @param dao CompanyDao to access Data
      */
-    private ComputerServiceImpl(ComputerDao dao) {
+    private ComputerServiceImpl(ComputerDaoImpl dao) {
         computerDao = dao;
     }
 
     /**
+     *
+     *
+     * /**
+     *
      * @return a loaded Service, ready to work
      */
-    public static ComputerServiceImpl getInstance() {
+    public static IComputerService getInstance() {
         if (instance == null) {
-            instance = new ComputerServiceImpl(ComputerDao.getInstance());
+            instance = new ComputerServiceImpl(ComputerDaoImpl.getInstance());
         }
         return instance;
-    }
-
-    /**
-     * @return the full list of computer, only name and id preview
-     * @throws DaoException content couldn't be loaded
-     */
-    public List<ComputerPreview> getComputersList() throws DaoException {
-        return computerDao.getComputersList();
     }
 
     /**
@@ -44,17 +45,9 @@ public class ComputerServiceImpl {
      * @return the first computer corresponding exactly to @id
      * @throws DaoException content couldn't be loaded
      */
+    @Override
     public Computer getComputerDetail(Long id) throws DaoException {
         return computerDao.getComputerDetail(id);
-    }
-
-    /**
-     * @param name the name to search
-     * @return the first computer corresponding exactly to @name
-     * @throws DaoException content couldn't be loaded
-     */
-    public Computer getComputerDetail(String name) throws DaoException {
-        return computerDao.getComputerDetail(name);
     }
 
     /**
@@ -62,6 +55,7 @@ public class ComputerServiceImpl {
      * @return the id of the created computer
      * @throws DaoException content couldn't be loaded
      */
+    @Override
     public Long createComputer(Computer newComputer) throws DaoException {
         return computerDao.createComputer(newComputer);
     }
@@ -70,6 +64,7 @@ public class ComputerServiceImpl {
      * @param c full computer to update with id != null
      * @throws DaoException content couldn't be loaded
      */
+    @Override
     public void updateComputer(Computer c) throws DaoException {
         computerDao.updateComputer(c);
     }
@@ -78,17 +73,61 @@ public class ComputerServiceImpl {
      * @param id id of the computer to delete
      * @throws DaoException content couldn't be loaded
      */
+    @Override
     public void deleteComputer(Long id) throws DaoException {
         computerDao.deleteComputer(id);
     }
 
     /**
+     * @param ids ids list of the computer to delete
+     * @throws DaoException content couldn't be loaded
+     */
+    @Override
+    public void deleteComputers(List<Long> ids) throws DaoException {
+        computerDao.deleteComputers(ids);
+    }
+
+    /**
+     * @param pageBuilder page request
      * @return the first page of the full computer preview list from DB
      * @throws DaoException content couldn't be loaded
      */
-    public Page<ComputerPreview> getComputerPage() throws DaoException {
+    @Override
+    public Page<Computer> loadPage(PageBuilder<Computer> pageBuilder) {
+        PageQuery<Computer> pageQuery = getPageQuery();
 
-        return computerDao.getComputerPage();
+        try {
+            Long size = getCount(pageBuilder.getSearch());
+            Page<Computer> page = pageBuilder.build(pageQuery, size);
+            return page.load();
+        } catch (DaoException e) {
+            LOGGER.error(e.getMessage());
+            return null;
+        }
+    }
+
+    /**
+     * @param search filter to search (computer or company name like) or null
+     * @return number of elem
+     * @throws DaoException fail to load
+     */
+    private Long getCount(String search) throws DaoException {
+        return search == null ? computerDao.getComputerTotalCount() : computerDao.getComputerTotalCount(search);
+    }
+
+    private PageQuery<Computer> getPageQuery() {
+        return (Page<Computer> page) -> {
+            return computerDao.get(page);
+        };
+    }
+
+    /**
+     * @param id id of the company to delete computers from
+     * @throws DaoException deletion failed
+     */
+    @Override
+    public void deleteComputerByCompany(Long id) throws DaoException {
+        computerDao.deleteComputerByCompany(id);
     }
 
 }

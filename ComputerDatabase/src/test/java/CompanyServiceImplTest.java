@@ -1,5 +1,4 @@
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
@@ -11,7 +10,7 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.runners.MockitoJUnitRunner;
 
-import persistence.CompanyDao;
+import persistence.CompanyDaoImpl;
 import persistence.exceptions.DaoException;
 import service.CompanyServiceImpl;
 
@@ -19,13 +18,13 @@ import service.CompanyServiceImpl;
 public class CompanyServiceImplTest {
 
     @Mock
-    private static CompanyDao companyDao;
+    private static CompanyDaoImpl companyDao;
 
     @InjectMocks
     private CompanyServiceImpl service;
 
     /**
-     * Init mock.
+     * Init mock, mostly Dao.
      * @throws DaoException never thrown
      */
     @Before
@@ -38,7 +37,7 @@ public class CompanyServiceImplTest {
      */
     @Test
     public void testCompanyExists() throws DaoException {
-        assertTrue(service.companyExists(10L));
+        assertTrue(service.exists(10L));
         verify(companyDao, times(1)).companyExists(10L);
     }
 
@@ -47,8 +46,7 @@ public class CompanyServiceImplTest {
      */
     @Test(expected = NullPointerException.class)
     public void testCompanyExistsWithNullObject() throws DaoException {
-        Boolean result = service.companyExists(null);
-        fail("should have thrown");
+        service.exists(null);
     }
 
 }

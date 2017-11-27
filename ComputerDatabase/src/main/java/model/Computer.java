@@ -8,8 +8,7 @@ public class Computer {
     private String    name;
     private LocalDate introduced;
     private LocalDate discontinued;
-    private Long      companyId;
-
+    private Company   company;
 
     /**
      * @param name name
@@ -18,7 +17,28 @@ public class Computer {
      * @param companyId companyId
      */
     public Computer(String name, LocalDate introduced, LocalDate discontinued, Long companyId) {
-        this(null, name, introduced, discontinued, companyId);
+        this(null, name, introduced, discontinued, new Company(companyId, null));
+    }
+
+    /**
+     * @param name name
+     * @param introduced introduced
+     * @param discontinued discontinued
+     * @param company company
+     */
+    public Computer(String name, LocalDate introduced, LocalDate discontinued, Company company) {
+        this(null, name, introduced, discontinued, company);
+    }
+
+    /**
+     * @param id id
+     * @param name name
+     * @param introduced introduced
+     * @param discontinued discontinued
+     * @param companyId companyId
+     */
+    public Computer(Long id, String name, LocalDate introduced, LocalDate discontinued, Long companyId) {
+        this(id, name, introduced, discontinued, new Company(companyId, null));
     }
 
     /**
@@ -26,14 +46,14 @@ public class Computer {
      * @param name name
      * @param introduced introduced
      * @param discontinued discontinued
-     * @param companyId companyId
+     * @param company company
      */
-    public Computer(Long id, String name, LocalDate introduced, LocalDate discontinued, Long companyId) {
+    public Computer(Long id, String name, LocalDate introduced, LocalDate discontinued, Company company) {
         this.id = id;
         this.name = name;
         this.introduced = introduced;
         this.discontinued = discontinued;
-        this.companyId = companyId;
+        this.company = company;
     }
 
     /**
@@ -42,7 +62,7 @@ public class Computer {
     @Override
     public String toString() {
         return "id=" + id + ", name=\"" + name + "\", introduced=" + introduced + ", discontinued=" + discontinued
-                + ", company_id=" + companyId;
+                + ", company={" + company.toString() + "}";
     }
 
     public String getName() {
@@ -69,12 +89,12 @@ public class Computer {
         this.discontinued = discontinued;
     }
 
-    public Long getCompanyId() {
-        return companyId;
+    public Company getCompany() {
+        return company;
     }
 
-    public void setCompanyId(Long companyId) {
-        this.companyId = companyId;
+    public void setCompany(Company company) {
+        this.company = company;
     }
 
     public Long getId() {

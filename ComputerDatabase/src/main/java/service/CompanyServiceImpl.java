@@ -1,31 +1,35 @@
 package service;
 
+import java.sql.Connection;
 import java.util.List;
 
-import mapper.pages.Page;
 import model.Company;
-import persistence.CompanyDao;
+import model.pages.Page;
+import persistence.CompanyDaoImpl;
+import persistence.Transaction;
 import persistence.exceptions.DaoException;
 
-public class CompanyServiceImpl {
+public class CompanyServiceImpl implements ICompanyService {
+
 
     private static CompanyServiceImpl instance;
-    private CompanyDao companyDao;
+    private CompanyDaoImpl companyDao;
 
     /**
      * Private ctor.
+     *
      * @param dao CompanyDao to access Data
      */
-    private CompanyServiceImpl(CompanyDao dao) {
+    private CompanyServiceImpl(CompanyDaoImpl dao) {
         companyDao = dao;
     }
 
     /**
      * @return a loaded Service, ready to work
      */
-    public static CompanyServiceImpl getInstance() {
+    public static ICompanyService getInstance() {
         if (instance == null) {
-            instance = new CompanyServiceImpl(CompanyDao.getInstance());
+            instance = new CompanyServiceImpl(CompanyDaoImpl.getInstance());
         }
         return instance;
     }
@@ -34,7 +38,8 @@ public class CompanyServiceImpl {
      * @return Full company list from DB
      * @throws DaoException content couldn't be loaded
      */
-    public List<Company> getCompanyList() throws DaoException {
+    @Override
+    public List<Company> getList() throws DaoException {
         return companyDao.getCompanyList();
     }
 
@@ -43,7 +48,8 @@ public class CompanyServiceImpl {
      * @return true is company id is present in DB
      * @throws DaoException content couldn't be loaded
      */
-    public boolean companyExists(Long idCompany) throws DaoException {
+    @Override
+    public boolean exists(Long idCompany) throws DaoException {
         if (idCompany == null) {
             throw new NullPointerException();
         }
@@ -54,9 +60,23 @@ public class CompanyServiceImpl {
      * @return the first page of the full company list from DB
      * @throws DaoException content couldn't be loaded
      */
-    public Page<Company> getCompanyPage() throws DaoException {
+    @Override
+    public Page<Company> getPage() throws DaoException {
 
         return companyDao.getCompanyPage();
     }
 
+    /**
+     * @param id id to delete
+     * @throws DaoException failed to delete
+     */
+    @Override
+    public void delete(Long id) throws DaoException {
+        Connection conn = Transaction.openTransaction();
+
+        ComputerServiceImpl.getInstance().deleteComputerByCompany(id);
+        companyDao.deleteCompany(id);
+
+        Transaction.releaseTransaction(conn);
+    }
 }
