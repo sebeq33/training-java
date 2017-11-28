@@ -31,16 +31,22 @@
 								<input type="hidden" id="id" name="id" value="${ id }" />
 							</c:if>
 							<div class="form-group">
+								<label for="computerName">
+									<spring:message code="computer.name" />
+								</label>
+								<input type="text" class="form-control" id="computerName" placeholder="Computer name" name="computerName" value="<c:out value="${ computerName }"/>"/>
+							</div>
+							<div class="form-group">
 								<label for="introduced">
 									<spring:message code="computer.introduced" />
 								</label>
-								<input type="date" class="form-control" id="introduced" placeholder="Introduced date" name="introduced" value="${ introduced }">
+								<input type="date" class="form-control" id="introduced" placeholder="Introduced date" name="introduced" value="<c:out value="${ introduced }"/>"/>
 							</div>
 							<div class="form-group">
 								<label for="discontinued">
 									<spring:message code="computer.discontinued" />
 								</label>
-								<input type="date" class="form-control" id="discontinued" placeholder="Discontinued date" name="discontinued" value="${ discontinued }">
+								<input type="date" class="form-control" id="discontinued" placeholder="Discontinued date" name="discontinued" value="<c:out value="${ discontinued }"/>"/>
 							</div>
 							<div class="form-group">
 								<label for="companyId">
@@ -49,7 +55,7 @@
 								<select class="form-control" id="companyId" name="companyId">
 									<option value="--">--</option>
 									<c:forEach items="${ companies }" var="item">
-										<option value="${ item.id }" ${ item.id eq companyId ? 'selected' : '' }>${ item.name }</option>
+										<option value="${ item.id }" ${ item.id eq companyId ? 'selected' : '' }><c:out value="${ item.name }"/></option>
 									</c:forEach>
 								</select>
 							</div>
