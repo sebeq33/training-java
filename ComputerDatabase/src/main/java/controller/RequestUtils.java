@@ -7,6 +7,9 @@ import java.time.format.DateTimeFormatter;
 
 import javax.servlet.http.HttpServletRequest;
 
+import org.springframework.ui.ModelMap;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+
 import model.ComputerDto;
 import model.pages.Page;
 import validators.ValidationUtils;
@@ -63,6 +66,16 @@ public class RequestUtils {
     }
 
     /**
+     * @param r RedirectAttributes
+     * @param success success
+     * @param msg msg
+     */
+    public static void showMsg(RedirectAttributes r, boolean success, String msg) {
+        r.addFlashAttribute("msg", msg);
+        r.addFlashAttribute("success", success);
+    }
+
+    /**
      * @param date localDate
      * @return string formatted as ValidationUtils.DATE_FORMAT
      */
@@ -75,10 +88,10 @@ public class RequestUtils {
     }
 
     /**
-     * @param req req to fill
+     * @param model model to fill
      * @param page page with the request
      */
-    public static void buildPageParams(HttpServletRequest req, Page<?> page) {
+    public static void buildPageParams(ModelMap model, Page<?> page) {
         StringBuilder pageParam = new StringBuilder();
         String sortParams = null;
         try {
@@ -100,9 +113,11 @@ public class RequestUtils {
         } catch (UnsupportedEncodingException e) {
             throw new AssertionError("UTF-8 is unknown");
         }
-        req.setAttribute("sortparams", sortParams);
-        req.setAttribute("pageparams", pageParam.toString());
+        model.addAttribute("sortparams", sortParams);
+        model.addAttribute("pageparams", pageParam.toString());
     }
+
+
 
 
 }

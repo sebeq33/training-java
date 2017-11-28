@@ -5,6 +5,9 @@ import java.util.List;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import model.Computer;
 import model.pages.Page;
@@ -13,6 +16,8 @@ import persistence.querycommands.PageQuery;
 import service.IComputerService;
 import service.PageRequest;
 
+@Service("computerService")
+@Transactional(readOnly = true, rollbackFor = SQLException.class)
 public class ComputerService implements IComputerService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ComputerService.class);
@@ -23,6 +28,7 @@ public class ComputerService implements IComputerService {
      *
      * @param dao CompanyDao to access Data
      */
+    @Autowired
     private ComputerService(IComputerDao dao) {
         computerDao = dao;
     }
@@ -47,6 +53,7 @@ public class ComputerService implements IComputerService {
      * @throws SQLException content couldn't be loaded
      */
     @Override
+    @Transactional(readOnly = false)
     public void create(Computer newComputer) {
         try {
             Long id = computerDao.createComputer(newComputer);
@@ -63,6 +70,7 @@ public class ComputerService implements IComputerService {
      * @throws SQLException content couldn't be loaded
      */
     @Override
+    @Transactional(readOnly = false)
     public void update(Computer c) {
         try {
             computerDao.updateComputer(c);
@@ -78,6 +86,7 @@ public class ComputerService implements IComputerService {
      * @throws SQLException content couldn't be loaded
      */
     @Override
+    @Transactional(readOnly = false)
     public void delete(Long id) {
         try {
             computerDao.deleteComputer(id);
@@ -91,6 +100,7 @@ public class ComputerService implements IComputerService {
      * @throws SQLException content couldn't be loaded
      */
     @Override
+    @Transactional(readOnly = false)
     public void delete(List<Long> ids) {
         try {
             computerDao.deleteComputers(ids);
@@ -109,6 +119,7 @@ public class ComputerService implements IComputerService {
      * @throws SQLException content couldn't be loaded
      */
     @Override
+    @Transactional(readOnly = false)
     public Page<Computer> loadPage(PageRequest<Computer> request) {
         try {
             PageQuery<Computer> pageQuery = (Page<Computer> page) -> computerDao.get(page);
@@ -139,6 +150,7 @@ public class ComputerService implements IComputerService {
      * @throws SQLException deletion failed
      */
     @Override
+    @Transactional(readOnly = false)
     public void deleteByCompany(Long id) {
         try {
             computerDao.deleteByCompany(id);

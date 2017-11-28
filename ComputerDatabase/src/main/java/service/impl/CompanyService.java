@@ -5,6 +5,9 @@ import java.util.List;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import model.Company;
 import model.pages.Page;
@@ -12,6 +15,8 @@ import persistence.ICompanyDao;
 import service.ICompanyService;
 import service.IComputerService;
 
+@Service("companyService")
+@Transactional(readOnly = true)
 public class CompanyService implements ICompanyService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(CompanyService.class);
@@ -21,11 +26,12 @@ public class CompanyService implements ICompanyService {
     /**
      * Private ctor.
      *
-     * @param dao CompanyDao to access Data
+     * @param companyDao CompanyDao to access Data
      * @param computerService computerService to handle transactions
      */
-    private CompanyService(ICompanyDao dao, IComputerService computerService) {
-        this.companyDao = dao;
+    @Autowired
+    private CompanyService(ICompanyDao companyDao, IComputerService computerService) {
+        this.companyDao = companyDao;
         this.computerService = computerService;
     }
 
@@ -67,6 +73,7 @@ public class CompanyService implements ICompanyService {
      * @throws SQLException failed to delete
      */
     @Override
+    @Transactional(readOnly = false, rollbackFor = SQLException.class)
     public void delete(Long id) {
 
         try {
@@ -86,6 +93,7 @@ public class CompanyService implements ICompanyService {
      * @return the first page of the full company list from DB
      */
     @Override
+    @Transactional(readOnly = false)
     public Page<Company> getPage() {
         try {
             return companyDao.getCompanyPage();

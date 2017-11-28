@@ -1,78 +1,27 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <beans xmlns="http://www.springframework.org/schema/beans"
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:aop="http://www.springframework.org/schema/aop"
-	xmlns:tx="http://www.springframework.org/schema/tx"
+	xmlns:tx="http://www.springframework.org/schema/tx" xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:mvc="http://www.springframework.org/schema/mvc"
 	xsi:schemaLocation="http://www.springframework.org/schema/beans
-    http://www.springframework.org/schema/beans/spring-beans-2.0.xsd
+    http://www.springframework.org/schema/beans/spring-beans-2.5.xsd
     http://www.springframework.org/schema/aop
-    http://www.springframework.org/schema/aop/spring-aop-2.0.xsd
+    http://www.springframework.org/schema/aop/spring-aop-2.5.xsd
     http://www.springframework.org/schema/tx
-    http://www.springframework.org/schema/tx/spring-tx-2.0.xsd">
+    http://www.springframework.org/schema/tx/spring-tx-2.5.xsd
+    http://www.springframework.org/schema/context
+    http://www.springframework.org/schema/context/spring-context.xsd
+    http://www.springframework.org/schema/mvc
+    http://www.springframework.org/schema/mvc/spring-mvc.xsd">
 
-	<!-- #### SERVICES #########################################-->
-	<bean id="companyService" class="service.impl.CompanyService"
-		lazy-init="true">
-		<constructor-arg>
-			<ref bean="companyDao" />
-		</constructor-arg>
-		<constructor-arg>
-			<ref bean="computerService" />
-		</constructor-arg>
-	</bean>
-	<bean id="computerService" class="service.impl.ComputerService"
-		lazy-init="true">
-		<constructor-arg>
-			<ref bean="computerDao" />
-		</constructor-arg>
-	</bean>
+	<mvc:annotation-driven />
+	<context:component-scan base-package="persistence" />
+	<context:component-scan base-package="persistence.impl" />
+	<context:component-scan base-package="service.impl" />
 
+	<!-- #### Transactions ######################################### -->
 
-
-	<!-- #### DAOs ######################################### -->
-	<bean id="companyDao" class="persistence.impl.CompanyDao">
-		<constructor-arg>
-			<ref bean="daoConnection" />
-		</constructor-arg>
-	</bean>
-	<bean id="computerDao" class="persistence.impl.ComputerDao">
-		<constructor-arg>
-			<ref bean="daoConnection" />
-		</constructor-arg>
-	</bean>
-
-
-
-	<!-- #### DaoConnection ######################################### -->
-	<bean id="daoConnection" class="persistence.DaoConnection">
-		<constructor-arg>
-			<ref bean="dataSource" />
-		</constructor-arg>
-	</bean>
-	
-	
-
-	<!-- #### TRANSACTIONS ######################################### -->
-	<aop:config>
-		<aop:pointcut id="computerServiceOperation" expression="execution(* service.IComputerService.*(..))" />
-		<aop:pointcut id="companyServiceOperation" expression="execution(* service.ICompanyService.*(..))" />
-		<aop:advisor advice-ref="defaultAdvice" pointcut-ref="computerServiceOperation" />
-		<aop:advisor advice-ref="txAdvice" pointcut-ref="companyServiceOperation" />
-	</aop:config>
-
-	<tx:advice id="txAdvice" transaction-manager="txManager">
-		<tx:attributes>
-			<!-- all methods starting with 'get' are read-only -->
-			<tx:method name="get*" read-only="true" />
-			<tx:method name="delete*" isolation="DEFAULT" rollback-for="java.sql.SQLException;"/>
-			<tx:method name="*" />
-		</tx:attributes>
-	</tx:advice>
-	<tx:advice id="defaultAdvice" transaction-manager="txManager">
-		<tx:attributes>
-			<tx:method name="get*" read-only="true" />
-			<tx:method name="*" />
-		</tx:attributes>
-	</tx:advice>
+	<tx:annotation-driven transaction-manager="txManager" />
 
 	<bean id="txManager"
 		class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
@@ -80,11 +29,10 @@
 	</bean>
 
 
-
 	<!-- #### HikariCP configuration ######################################### -->
 	<bean
 		class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
-		<property name="location" value="classpath:config.properties" />
+		<property name="location" value="classpath:configdb.properties" />
 	</bean>
 
 	<bean id="hikariConfig" class="com.zaxxer.hikari.HikariConfig">
