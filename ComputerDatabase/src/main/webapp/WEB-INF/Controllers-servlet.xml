@@ -11,8 +11,7 @@
 	<mvc:annotation-driven />
 	<mvc:resources mapping="/**" location="/" />
 	<context:component-scan base-package="controller" />
-	<context:annotation-config />
-
+	
 	<!-- #### Languages ######################################### -->
 
 	<bean id="messageSource"
@@ -25,13 +24,13 @@
 		class="org.springframework.web.servlet.i18n.CookieLocaleResolver">
 		<property name="defaultLocale" value="en" />
 		<property name="cookieName" value="my-locale-cookie" />
-		<property name="cookieMaxAge" value="3600" />
+		<property name="cookieMaxAge" value="1000000" />
 	</bean>
 
 	<mvc:interceptors>
 		<bean id="localeChangeInterceptor"
 			class="org.springframework.web.servlet.i18n.LocaleChangeInterceptor">
-			<property name="paramName" value="lang"></property>
+			<property name="paramName" value="lang"/>
 		</bean>
 	</mvc:interceptors>
 
