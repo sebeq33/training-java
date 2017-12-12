@@ -13,14 +13,14 @@ import org.mockito.Mockito;
 import org.mockito.runners.MockitoJUnitRunner;
 
 import model.Computer;
-import persistence.impl.ComputerDao;
+import persistence.IComputerDao;
 import service.impl.ComputerService;
 
 @RunWith(MockitoJUnitRunner.class)
 public class ComputerServiceImplTest {
 
     @Mock
-    private static ComputerDao computerDao;
+    private static IComputerDao computerDao;
 
     @InjectMocks
     private ComputerService service;
@@ -31,7 +31,7 @@ public class ComputerServiceImplTest {
      */
     @Before
     public void setUp() throws SQLException {
-        Mockito.when(computerDao.getComputerDetail(1L)).thenReturn(Mockito.mock(Computer.class));
+        Mockito.when(computerDao.getOne(1L)).thenReturn(Mockito.mock(Computer.class));
     }
 
     /**
@@ -40,6 +40,6 @@ public class ComputerServiceImplTest {
     @Test
     public void testGetComputerList() throws SQLException {
         assertNotNull(service.getDetail(1L));
-        verify(computerDao, times(1)).getComputerDetail(1L);
+        verify(computerDao, times(1)).getOne(1L);
     }
 }

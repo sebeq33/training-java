@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 
+import model.Company;
 import model.Computer;
 import model.ComputerDto;
 import service.ICompanyService;
@@ -35,7 +36,6 @@ public class EditComputer {
     protected String doGet(HttpServletRequest req) {
 
         if (!loadComputer(req)) {
-
             return "redirect:/add-computer";
         }
 
@@ -59,7 +59,9 @@ public class EditComputer {
 
         } else {
 
-            Computer c = new Computer(v.getId(), dto.getName(), v.getIntroduced(), v.getDiscontinued(), v.getCompanyId());
+            Long companyId = v.getCompanyId();
+            Company company = companyId == null ? null : new Company(companyId, null);
+            Computer c = new Computer(v.getId(), dto.getName(), v.getIntroduced(), v.getDiscontinued(), company);
             computerService.update(c);
             RequestUtils.showMsg(req, true, "SUCCESS: Computer \"" + c.getName() + "\" successfully edited (id=" + v.getId() + ")");
 
@@ -94,7 +96,7 @@ public class EditComputer {
 
         Long id = Long.parseLong(idStr);
         Computer c = computerService.getDetail(id);
-        RequestUtils.putAttributes(req, id, c.getName(), c.getIntroduced(), c.getDiscontinued(), c.getCompany().getId());
+        RequestUtils.putAttributes(req, id, c.getName(), c.getIntroduced(), c.getDiscontinued(), c.getCompany());
         return true;
     }
 

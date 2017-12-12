@@ -12,9 +12,8 @@ import org.mockito.Mockito;
 import org.mockito.runners.MockitoJUnitRunner;
 
 import model.Computer;
-import model.pages.Page;
-import persistence.querycommands.PageQuery;
-import service.PageRequest;
+import model.pages.PageDto;
+import service.PageBuilder;
 
 @RunWith(MockitoJUnitRunner.class)
 public class PageResquestTest {
@@ -24,7 +23,7 @@ public class PageResquestTest {
      */
     @Test
     public void pageAndpageSizeDefault() {
-        PageRequest<Computer> r = new PageRequest<Computer>();
+        PageBuilder<Computer> r = new PageBuilder<Computer>();
 
         assertNotNull(r.getPageSize());
         assertNotSame(0L, r.getPageSize());
@@ -38,7 +37,7 @@ public class PageResquestTest {
      */
     @Test
     public void pageSizeLimit() {
-        PageRequest<Computer> r = new PageRequest<Computer>();
+        PageBuilder<Computer> r = new PageBuilder<Computer>();
 
         r.withPageSize(10L);
         assertSame(10L, r.getPageSize());
@@ -57,32 +56,12 @@ public class PageResquestTest {
     @Test
     public void buildNormal() throws SQLException {
         List<Computer> asList = Arrays.asList(Mockito.mock(Computer.class));
-        PageRequest<Computer> r = new PageRequest<Computer>();
-        PageQuery<Computer> q = (page) -> {
-            return asList;
-        };
-        Page<Computer> pageResult = r.build(q, 10L);
+        PageBuilder<Computer> r = new PageBuilder<Computer>();
+        PageDto<Computer> pageResult = r.build(asList, 10L);
         assertSame(10L, pageResult.getTotalCount());
 
         assertSame(null, pageResult.getContent());
-        pageResult.load();
         assertSame(asList, pageResult.getContent());
     }
 
-    /**
-     * resize page if trying to load to high.
-     * @throws SQLException impossible
-     */
-    @Test
-    public void resizePage() throws SQLException {
-        List<Computer> asList = Arrays.asList(Mockito.mock(Computer.class));
-        PageQuery<Computer> q = (page) -> {
-            return asList;
-        };
-
-        PageRequest<Computer> r = new PageRequest<Computer>().withPageSize(10L).atPage(3L);
-        Page<Computer> pageResult = r.build(q, 20L);
-        assertSame(20L, pageResult.getTotalCount());
-        assertSame(2L, pageResult.getCurrentPage());
-    }
 }

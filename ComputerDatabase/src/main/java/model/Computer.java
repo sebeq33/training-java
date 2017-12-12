@@ -2,43 +2,45 @@ package model;
 
 import java.time.LocalDate;
 
+import javax.persistence.CascadeType;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.FetchType;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
+import javax.persistence.Table;
+
+import mapper.ComputerMapper;
+
+@Entity
+@Table(name = "computer")
 public class Computer {
 
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = ComputerMapper.ID)
     private Long      id;
+
+    @Column(name = ComputerMapper.NAME)
     private String    name;
+
+    @Column(name = ComputerMapper.INTRODUCED)
     private LocalDate introduced;
+
+    @Column(name = ComputerMapper.DISCONTINUED)
     private LocalDate discontinued;
+
+    @ManyToOne(fetch = FetchType.EAGER, cascade = CascadeType.DETACH)
+    @JoinColumn(name = "company_id", nullable = true)
     private Company   company;
 
     /**
-     * @param name name
-     * @param introduced introduced
-     * @param discontinued discontinued
-     * @param companyId companyId
+     * Default Ctor.
      */
-    public Computer(String name, LocalDate introduced, LocalDate discontinued, Long companyId) {
-        this(null, name, introduced, discontinued, new Company(companyId, null));
-    }
-
-    /**
-     * @param name name
-     * @param introduced introduced
-     * @param discontinued discontinued
-     * @param company company
-     */
-    public Computer(String name, LocalDate introduced, LocalDate discontinued, Company company) {
-        this(null, name, introduced, discontinued, company);
-    }
-
-    /**
-     * @param id id
-     * @param name name
-     * @param introduced introduced
-     * @param discontinued discontinued
-     * @param companyId companyId
-     */
-    public Computer(Long id, String name, LocalDate introduced, LocalDate discontinued, Long companyId) {
-        this(id, name, introduced, discontinued, new Company(companyId, null));
+    public Computer() {
     }
 
     /**

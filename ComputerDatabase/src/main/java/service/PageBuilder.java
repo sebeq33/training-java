@@ -1,11 +1,12 @@
 package service;
 
+import java.util.List;
+
 import mapper.ComputerMapping;
 import model.pages.Order;
-import model.pages.Page;
-import persistence.querycommands.PageQuery;
+import model.pages.PageDto;
 
-public class PageRequest<T> {
+public class PageBuilder<T> {
 
     private static final Long DEFAULT_PAGESIZE      = 20L;
     private static final Long DEFAULT_STARTING_PAGE = 1L;
@@ -19,14 +20,14 @@ public class PageRequest<T> {
     /**
      * default ctor.
      */
-    public PageRequest() {
+    public PageBuilder() {
     }
 
     /**
      * @param parameter order as String ASC/DESC
      * @return this
      */
-    public PageRequest<T> withOrder(String parameter) {
+    public PageBuilder<T> withOrder(String parameter) {
         if (parameter == null || parameter.isEmpty()) {
             return this;
         }
@@ -39,7 +40,7 @@ public class PageRequest<T> {
      * @param parameter sort column (see ComputerMapper)
      * @return this
      */
-    public PageRequest<T> withSort(String parameter) {
+    public PageBuilder<T> withSort(String parameter) {
         if (parameter == null || parameter.isEmpty()) {
             return this;
         }
@@ -51,7 +52,7 @@ public class PageRequest<T> {
      * @param parameter search String
      * @return this
      */
-    public PageRequest<T> withSearch(String parameter) {
+    public PageBuilder<T> withSearch(String parameter) {
         if (parameter == null || parameter.isEmpty()) {
             return this;
         }
@@ -64,7 +65,7 @@ public class PageRequest<T> {
      * @param pageSize pageSize
      * @return this
      */
-    public PageRequest<T> withPageSize(Long pageSize) {
+    public PageBuilder<T> withPageSize(Long pageSize) {
         this.pageSize = Math.min(pageSize, 100L);
         return this;
     }
@@ -73,7 +74,7 @@ public class PageRequest<T> {
      * @param pageNumber pageNumber
      * @return this
      */
-    public PageRequest<T> atPage(Long pageNumber) {
+    public PageBuilder<T> atPage(Long pageNumber) {
         this.nbPage = pageNumber;
         return this;
     }
@@ -99,24 +100,11 @@ public class PageRequest<T> {
     }
 
     /**
-     * @param pageQuery query used to retrieve content
+     * @param content loaded Content
      * @param size total number of element
      * @return the resulting page
      */
-    public Page<T> build(PageQuery<T> pageQuery, Long size) {
-        Long firstEntityIndex = PageUtils.getFirstEntityIndex(this.nbPage, this.pageSize);
-        movePageIfDeleted(size, firstEntityIndex);
-        return new Page<T>(pageQuery, size, this);
-    }
-
-    /**
-     * Reset the page number if the selected page is empty, is case of deletion for instance.
-     * @param size size
-     * @param firstEntityIndex index
-     */
-    private void movePageIfDeleted(Long size, Long firstEntityIndex) {
-        if (size != 0 && firstEntityIndex >= size) {
-            this.nbPage = PageUtils.getLimit(pageSize, size);
-        }
+    public PageDto<T> build(List<T> content, Long size) {
+        return new PageDto<T>(content, size, this);
     }
 }

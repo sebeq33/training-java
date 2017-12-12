@@ -1,6 +1,6 @@
 package service;
 
-import model.pages.Page;
+import model.pages.PageDto;
 
 public class PageUtils {
 
@@ -8,30 +8,13 @@ public class PageUtils {
      * @param page loaded page
      * @return concatenation of each .toString() loaded content
      */
-    public static String dump(Page<?> page) {
+    public static String dump(PageDto<?> page) {
         StringBuilder b = new StringBuilder();
         for (Object t : page.getContent()) {
             b.append(t.toString());
             b.append(System.lineSeparator());
         }
         return b.toString();
-    }
-
-    /**
-     * @param page current page (not need to be loaded)
-     * @return the start index of the db entity of the given page
-     */
-    public static Long getFirstEntityIndex(Page<?> page) {
-        return (getFirstEntityIndex(page.getCurrentPage(), page.getPageSize()));
-    }
-
-    /**
-     * @param pageNumber current page nb
-     * @param pageSize size of a page
-     * @return the start index of the db entity of the given page
-     */
-    public static Long getFirstEntityIndex(Long pageNumber, Long pageSize) {
-        return (pageNumber - 1) * pageSize;
     }
 
     /**

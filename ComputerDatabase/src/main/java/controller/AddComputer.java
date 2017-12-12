@@ -63,8 +63,10 @@ public class AddComputer {
 
         } else {
 
-            Computer c = new Computer(dto.getName(), v.getIntroduced(), v.getDiscontinued(), v.getCompanyId());
-            computerService.create(c);
+            Long companyId = v.getCompanyId();
+            Company company = companyId == null ? null : new Company(companyId, null);
+            Computer c = new Computer((Long) null, dto.getName(), v.getIntroduced(), v.getDiscontinued(), company);
+            c = computerService.create(c);
             RequestUtils.showMsg(req, true, "SUCCESS: Computer \"" + c.getName() + "\" successfully created (id=" + c.getId() + ")");
 
         }

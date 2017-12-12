@@ -22,12 +22,11 @@
     <level value="error"/>
 </logger>
 
-<!-- <logger name="org.springframework.jdbc.core.JdbcTemplate"> -->
-<!--   <level value="debug" /> -->
+<!-- <logger name="org.hibernate"> -->
+<!--     <level value="DEBUG"/> -->
 <!-- </logger> -->
-
-<!-- <logger name="org.springframework.jdbc.core.StatementCreatorUtils"> -->
-<!--     <level value="trace"/> -->
+<!-- <logger name="org.hibernate.SQL"> -->
+<!--     <level value="TRACE"/> -->
 <!-- </logger> -->
 
  <root level="info">

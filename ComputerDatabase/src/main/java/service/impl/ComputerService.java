@@ -2,35 +2,44 @@ package service.impl;
 
 import java.sql.SQLException;
 import java.util.List;
+import java.util.Optional;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import javax.persistence.EntityManager;
+
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import mapper.ComputerMapper;
+import mapper.ComputerMapping;
+import model.Company;
 import model.Computer;
-import model.pages.Page;
+import model.pages.PageDto;
 import persistence.IComputerDao;
-import persistence.querycommands.PageQuery;
 import service.IComputerService;
-import service.PageRequest;
+import service.PageBuilder;
 
 @Service("computerService")
-@Transactional(readOnly = true)
+@Transactional(readOnly = false)
 public class ComputerService implements IComputerService {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(ComputerService.class);
-    private IComputerDao        computerDao;
+    private IComputerDao  computerDao;
+    private EntityManager em;
 
     /**
      * Private ctor.
      *
      * @param dao CompanyDao to access Data
+     * @param em EntityManager
      */
     @Autowired
-    private ComputerService(IComputerDao dao) {
-        computerDao = dao;
+    private ComputerService(IComputerDao dao, EntityManager em) {
+        this.computerDao = dao;
+        this.em = em;
     }
 
     /**
@@ -39,30 +48,35 @@ public class ComputerService implements IComputerService {
      * @throws SQLException content couldn't be loaded
      */
     @Override
+    @Transactional(readOnly = true)
     public Computer getDetail(Long id) {
-        try {
-            return computerDao.getComputerDetail(id);
-        } catch (SQLException e) {
-            LOGGER.error("Computer " + id + " could not be loaded");
-            throw new RuntimeException(e);
-        }
+        Optional<Computer> one = computerDao.findById(id);
+//        Hibernate.initialize(one); //EAGER LOAD COMPANY ID
+        return one.get();
     }
 
     /**
      * @param newComputer complete computer to create, without id
+     * @return the saved entity
      * @throws SQLException content couldn't be loaded
      */
     @Override
-    @Transactional(readOnly = false)
-    public void create(Computer newComputer) {
-        try {
-            Long id = computerDao.createComputer(newComputer);
-            newComputer.setId(id);
-        } catch (SQLException e) {
-            String msg = "Computer cannot be created, reason \"" + e.getMessage() + "\"";
-            LOGGER.error(msg);
-            throw new RuntimeException(e);
+    public Computer create(Computer newComputer) {
+
+        return computerDao.save(setTransientCompanyFromId(newComputer));
+    }
+
+    /**
+     * @param newComputer with transient(Hibernate) company
+     * @return newComputer
+     */
+    private Computer setTransientCompanyFromId(Computer newComputer) {
+        Company transientC = newComputer.getCompany();
+        if (transientC != null) {
+            transientC = em.getReference(Company.class, transientC.getId());
+            newComputer.setCompany(transientC);
         }
+        return newComputer;
     }
 
     /**
@@ -70,15 +84,8 @@ public class ComputerService implements IComputerService {
      * @throws SQLException content couldn't be loaded
      */
     @Override
-    @Transactional(readOnly = false)
     public void update(Computer c) {
-        try {
-            computerDao.updateComputer(c);
-        } catch (SQLException e) {
-            String msg = "Computer cannot be edited, reason \"" + e.getMessage() + "\"";
-            LOGGER.error(msg);
-            throw new RuntimeException(e);
-        }
+        computerDao.save(setTransientCompanyFromId(c));
     }
 
     /**
@@ -86,13 +93,8 @@ public class ComputerService implements IComputerService {
      * @throws SQLException content couldn't be loaded
      */
     @Override
-    @Transactional(readOnly = false)
     public void delete(Long id) {
-        try {
-            computerDao.deleteComputer(id);
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
-        }
+        computerDao.deleteById(id);
     }
 
     /**
@@ -100,17 +102,8 @@ public class ComputerService implements IComputerService {
      * @throws SQLException content couldn't be loaded
      */
     @Override
-    @Transactional(readOnly = false)
     public void delete(List<Long> ids) {
-        try {
-            computerDao.deleteComputers(ids);
-
-        } catch (SQLException e) {
-            String msg = "failed to execute deletion, reason :" + e.getMessage();
-            LOGGER.error(msg);
-            throw new RuntimeException(e);
-        }
-
+        computerDao.deleteAllByIdIn(ids);
     }
 
     /**
@@ -119,17 +112,34 @@ public class ComputerService implements IComputerService {
      * @throws SQLException content couldn't be loaded
      */
     @Override
-    @Transactional(readOnly = false)
-    public Page<Computer> loadPage(PageRequest<Computer> request) {
-        try {
-            PageQuery<Computer> pageQuery = (Page<Computer> page) -> computerDao.get(page);
-            Long size = getCount(request.getSearch());
-            return request.build(pageQuery, size).load();
+    public PageDto<Computer> loadPage(PageBuilder<Computer> request) {
+        String search = request.getSearch() == null ?
+            "" :
+            request.getSearch();
 
-        } catch (SQLException e) {
-            LOGGER.error(e.getMessage());
-            throw new RuntimeException(e);
-        }
+        Pageable r = createPageRequest(request);
+        Page<Computer> result = computerDao.findAllComputersByNameContainingOrCompanyNameContaining(r, search, search);
+        Long total = result.getTotalElements();
+
+        return request.build(result.getContent(), total);
+    }
+
+    /**
+     * @param request pageBuilder
+     * @return create spring PageRequest from PageBuilder
+     */
+    private Pageable createPageRequest(PageBuilder<Computer> request) {
+
+        String order = request.getOrder();
+        ComputerMapping columnSort = request.getColumnSort();
+        Sort.Direction s = order == null || order.equals("ASC") ?
+            Sort.Direction.ASC :
+            Sort.Direction.DESC;
+        String dbName = columnSort == null ?
+            ComputerMapper.ID :
+            columnSort.getDbName();
+
+        return PageRequest.of(request.getNbPage().intValue() - 1, request.getPageSize().intValue(), s, dbName);
     }
 
     /**
@@ -138,12 +148,11 @@ public class ComputerService implements IComputerService {
      * @throws SQLException fail to load
      */
     @Override
+    @Transactional(readOnly = true)
     public Long getCount(String search) {
-        try {
-            return search == null ? computerDao.getComputerTotalCount() : computerDao.getComputerTotalCount(search);
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
-        }
+        return search == null ?
+            computerDao.count() :
+            computerDao.countByNameContainingOrCompanyNameContaining(search, search);
     }
 
     /**
@@ -151,13 +160,7 @@ public class ComputerService implements IComputerService {
      * @throws SQLException deletion failed
      */
     @Override
-    @Transactional(readOnly = false)
     public void deleteByCompany(Long id) {
-        try {
-            computerDao.deleteByCompany(id);
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
-        }
+        computerDao.deleteAllByCompanyId(id);
     }
-
 }

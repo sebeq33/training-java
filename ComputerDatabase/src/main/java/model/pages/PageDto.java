@@ -1,16 +1,13 @@
 package model.pages;
 
-import java.sql.SQLException;
 import java.util.List;
 
 import mapper.ComputerMapping;
-import persistence.querycommands.PageQuery;
-import service.PageRequest;
+import service.PageBuilder;
 import service.PageUtils;
 
-public class Page<T> {
+public class PageDto<T> {
 
-    private PageQuery<T>    command;
     private List<T>         content;
     private Long            total;
 
@@ -23,12 +20,12 @@ public class Page<T> {
     /**
      * Contruct from a page builder.
      *
-     * @param pageQuery query to get content
+     * @param content content to display
      * @param total total of elem
      * @param pageBuilder builder
      */
-    public Page(PageQuery<T> pageQuery, Long total, PageRequest<T> pageBuilder) {
-        this(pageQuery, total);
+    public PageDto(List<T> content, Long total, PageBuilder<T> pageBuilder) {
+        this(content, total);
         this.nbPage = pageBuilder.getNbPage();
         this.pageSize = pageBuilder.getPageSize();
         this.search = pageBuilder.getSearch();
@@ -39,13 +36,13 @@ public class Page<T> {
     /**
      * Contruct from an already existing page.
      *
-     * @param pageQuery query to get content
+     * @param content content to display
      * @param total total of elem
      * @param page page
      * @param nbPage nbpage (starting a 1)
      */
-    public Page(PageQuery<T> pageQuery, Long total, Page<T> page, Long nbPage) {
-        this(pageQuery, total);
+    public PageDto(List<T> content, Long total, PageDto<T> page, Long nbPage) {
+        this(content, total);
 
         this.nbPage = nbPage;
         this.pageSize = page.getPageSize();
@@ -56,49 +53,24 @@ public class Page<T> {
 
     /**
      * Build a page without params (search, sort, order).
-     * @param query query
+     * @param content content to display
      * @param total nb of elem in DB
      * @param pageSize nb of elem / page
      * @param nbPage current page (starting a 1)
      */
-    public Page(PageQuery<T> query, Long total, Long pageSize, Long nbPage) {
-        this(query, total);
+    public PageDto(List<T> content, Long total, Long pageSize, Long nbPage) {
+        this(content, total);
         this.pageSize = pageSize;
     }
 
     /**
-     * @param pageQuery page
+     * @param content content to display
      * @param total total
      */
-    private Page(PageQuery<T> pageQuery, Long total) {
-        this.content = null;
-        this.command = pageQuery;
+    private PageDto(List<T> content, Long total) {
+        this.content = content;
         this.total = total;
     }
-
-    /**
-     * @return return the current page loaded if it wasn't, else return the next
-     *         page
-     * @throws SQLException page couldn't be loaded
-     */
-    public Page<T> next() throws SQLException {
-        if (!isLoaded()) {
-            return this.load();
-        }
-
-        Page<T> p = new Page<T>(command, total, this, nbPage + 1);
-        return p.load();
-    }
-
-    /**
-     * @return current page with loaded content
-     * @throws SQLException PageException page couldn't be loaded
-     */
-    public Page<T> load() throws SQLException {
-        content = command.getContent(this);
-        return this;
-    }
-
 
     /**
      * @return Content or null if not loaded

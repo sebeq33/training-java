@@ -13,10 +13,10 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import model.Computer;
-import model.pages.Page;
+import model.pages.PageDto;
 import service.ICompanyService;
 import service.IComputerService;
-import service.PageRequest;
+import service.PageBuilder;
 
 @Controller
 @RequestMapping("/dashboard")
@@ -47,7 +47,7 @@ public class Dashboard {
             @RequestParam(value = "sort", required = false) String sort,
             @RequestParam(value = "order", required = false) String order) {
 
-        PageRequest<Computer> builder = new PageRequest<Computer>();
+        PageBuilder<Computer> builder = new PageBuilder<Computer>();
         builder.atPage(pageNumber).withPageSize(pageSize).withSearch(search).withSort(sort).withOrder(order);
 
         loadDashboard(model, builder);
@@ -92,8 +92,8 @@ public class Dashboard {
      * @param model model
      * @param builder loaded request
      */
-    private void loadDashboard(ModelMap model, PageRequest<Computer> builder) {
-        Page<Computer> page = computerService.loadPage(builder);
+    private void loadDashboard(ModelMap model, PageBuilder<Computer> builder) {
+        PageDto<Computer> page = computerService.loadPage(builder);
         RequestUtils.buildPageParams(model, page);
         List<Computer> content = page.getContent();
         model.addAttribute("computers", content);

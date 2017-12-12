@@ -11,8 +11,9 @@ import javax.servlet.http.HttpServletRequest;
 import org.springframework.ui.ModelMap;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import model.Company;
 import model.ComputerDto;
-import model.pages.Page;
+import model.pages.PageDto;
 import validators.ValidationUtils;
 
 public class RequestUtils {
@@ -25,17 +26,17 @@ public class RequestUtils {
      * @param name name
      * @param introduced introduced
      * @param discontinued discontinued
-     * @param companyId idCompany
+     * @param company Company
      */
     public static void putAttributes(HttpServletRequest req, Long id, String name, LocalDate introduced,
-            LocalDate discontinued, Long companyId) {
+            LocalDate discontinued, Company company) {
         req.setAttribute("id", id);
         req.setAttribute(ValidationUtils.COMPUTER_NAME, name);
         String introducedStr = getFormattedString(introduced);
         req.setAttribute(ValidationUtils.INTRODUCED, introducedStr);
         String discontinuedStr = getFormattedString(discontinued);
         req.setAttribute(ValidationUtils.DISCONTINUED, discontinuedStr);
-        req.setAttribute(ValidationUtils.COMPANY_ID, companyId == null ? null : companyId.toString());
+        req.setAttribute(ValidationUtils.COMPANY_ID, company == null || company.getId() == null ? null : company.getId().toString());
     }
 
     /**
@@ -102,7 +103,7 @@ public class RequestUtils {
      * @param model model to fill
      * @param page page with the request
      */
-    public static void buildPageParams(ModelMap model, Page<?> page) {
+    public static void buildPageParams(ModelMap model, PageDto<?> page) {
         StringBuilder pageParam = new StringBuilder();
         String sortParams = null;
         try {

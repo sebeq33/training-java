@@ -12,14 +12,14 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.runners.MockitoJUnitRunner;
 
-import persistence.impl.CompanyDao;
+import persistence.ICompanyDao;
 import service.impl.CompanyService;
 
 @RunWith(MockitoJUnitRunner.class)
 public class CompanyServiceImplTest {
 
     @Mock
-    private static CompanyDao companyDao;
+    private static ICompanyDao companyDao;
 
     @InjectMocks
     private CompanyService service;
@@ -30,7 +30,7 @@ public class CompanyServiceImplTest {
      */
     @Before
     public void setUp() throws SQLException {
-        Mockito.when(companyDao.companyExists(10L)).thenReturn(true);
+        Mockito.when(companyDao.existsById(10L)).thenReturn(true);
     }
 
     /**
@@ -39,7 +39,7 @@ public class CompanyServiceImplTest {
     @Test
     public void testCompanyExists() throws SQLException {
         assertTrue(service.exists(10L));
-        verify(companyDao, times(1)).companyExists(10L);
+        verify(companyDao, times(1)).existsById(10L);
     }
 
     /**

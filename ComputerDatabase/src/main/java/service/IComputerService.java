@@ -4,7 +4,7 @@ import java.sql.SQLException;
 import java.util.List;
 
 import model.Computer;
-import model.pages.Page;
+import model.pages.PageDto;
 
 public interface IComputerService {
 
@@ -16,8 +16,9 @@ public interface IComputerService {
 
     /**
      * @param newComputer complete computer to create, without id
+     * @return created/Inserted Computer
      */
-    void create(Computer newComputer);
+    Computer create(Computer newComputer);
 
     /**
      * @param c full computer to update with id != null
@@ -38,7 +39,7 @@ public interface IComputerService {
      * @param pageBuilder page request
      * @return the first page of the full computer preview list from DB
      */
-    Page<Computer> loadPage(PageRequest<Computer> pageBuilder);
+    PageDto<Computer> loadPage(PageBuilder<Computer> pageBuilder);
 
     /**
      * @param id id of the company to delete computers from

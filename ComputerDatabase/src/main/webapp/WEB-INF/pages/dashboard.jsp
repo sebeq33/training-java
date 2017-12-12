@@ -8,18 +8,18 @@
 <head>
 <jsp:include page="/WEB-INF/pages/header.jsp" />
 <script type="text/javascript">
-  var lang = new Array();
-  lang['toogle.on'] = "<spring:message code='button.hide' javaScriptEscape='true' />";
-  lang['toogle.off'] = "<spring:message code='button.edit' javaScriptEscape='true' />";
-  lang['confirm.computer'] = "<spring:message code='confirm.computers' javaScriptEscape='true' />";
-  lang['confirm.company'] = "<spring:message code='confirm.company' javaScriptEscape='true' />";
+	var lang = new Array();
+	lang['toogle.on'] = "<spring:message code='button.hide' javaScriptEscape='true' />";
+	lang['toogle.off'] = "<spring:message code='button.edit' javaScriptEscape='true' />";
+	lang['confirm.computer'] = "<spring:message code='confirm.computers' javaScriptEscape='true' />";
+	lang['confirm.company'] = "<spring:message code='confirm.company' javaScriptEscape='true' />";
 </script>
 </head>
 <body>
 	<header class="navbar navbar-inverse navbar-fixed-top">
 		<div class="container">
 			<a class="navbar-brand" href="/ComputerDatabase/dashboard"> Application - Computer Database </a>
-			<mylib:lang/>
+			<mylib:lang />
 		</div>
 	</header>
 	<section id="main">
@@ -32,8 +32,15 @@
 				<div class="pull-left">
 					<form id="searchForm" action="#" method="GET" class="form-inline">
 						<input type="search" id="searchbox" name="search" class="form-control" placeholder="<spring:message code="dashboard.search"/>" value="${ page.search }" />
-						<input type="hidden" name="sort" value="${ page.formSort }" />
-						<input type="hidden" name="order" value="${ page.order }" />
+						<c:if test="${ not empty page.formSort }">
+							<input type="hidden" name="sort" value="${ page.formSort }" />
+						</c:if>
+						<c:if test="${ not empty page.order }">
+							<input type="hidden" name="order" value="${ page.order }" />
+						</c:if>
+						<c:if test="${ not empty page.pageSize }">
+							<input type="hidden" name="pagination" value="${ page.pageSize }" />
+						</c:if>
 						<input type="submit" id="searchsubmit" value="<spring:message code="button.search"/>" class="btn btn-primary" />
 					</form>
 				</div>
@@ -70,7 +77,9 @@
 						<mylib:sortTableHeader content="computer.introduced" column_name="introduced" current_order="${ page.order }" current_sort="${ page.formSort }" params="${sortparams}" />
 						<mylib:sortTableHeader content="computer.discontinued" column_name="discontinued" current_order="${ page.order }" current_sort="${ page.formSort }" params="${sortparams}" />
 						<mylib:sortTableHeader content="computer.company" column_name="company" current_order="${ page.order }" current_sort="${ page.formSort }" params="${sortparams}" />
-						<th class="editMode" style="width: 60px; height: 22px;"><spring:message code="dashboard.delete.company"/></th>
+						<th class="editMode" style="width: 60px; height: 22px;">
+							<spring:message code="dashboard.delete.company" />
+						</th>
 					</tr>
 				</thead>
 				<tbody id="results">
