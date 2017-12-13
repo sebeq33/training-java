@@ -1,5 +1,7 @@
 package controller;
 
+import java.util.NoSuchElementException;
+
 import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -95,8 +97,14 @@ public class EditComputer {
         }
 
         Long id = Long.parseLong(idStr);
-        Computer c = computerService.getDetail(id);
-        RequestUtils.putAttributes(req, id, c.getName(), c.getIntroduced(), c.getDiscontinued(), c.getCompany());
+        try {
+            Computer c = computerService.getDetail(id);
+            RequestUtils.putAttributes(req, id, c.getName(), c.getIntroduced(), c.getDiscontinued(), c.getCompany());
+        } catch (NoSuchElementException e) {
+            RequestUtils.showMsg(req, false, "No such element");
+            return false;
+        }
+
         return true;
     }
 
