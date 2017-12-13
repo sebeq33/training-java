@@ -2,6 +2,7 @@ package model;
 
 import java.time.LocalDate;
 
+import javax.persistence.Cacheable;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -13,6 +14,8 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
+import org.hibernate.annotations.Cache;
+import org.hibernate.annotations.CacheConcurrencyStrategy;
 import org.hibernate.annotations.Fetch;
 import org.hibernate.annotations.FetchMode;
 
@@ -20,6 +23,8 @@ import mapper.ComputerMapper;
 
 @Entity
 @Table(name = "computer")
+@Cacheable
+@Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
 public class Computer {
 
     @Id
@@ -37,7 +42,7 @@ public class Computer {
     private LocalDate discontinued;
 
     @ManyToOne(fetch = FetchType.EAGER, cascade = CascadeType.DETACH)
-    @Fetch(FetchMode.SELECT)
+    @Fetch(FetchMode.SELECT) // https://stackoverflow.com/questions/617145/hibernate-fetching-strategy-when-to-use-join-and-when-to-use-select
     @JoinColumn(name = "company_id", nullable = true)
     private Company   company;
 
