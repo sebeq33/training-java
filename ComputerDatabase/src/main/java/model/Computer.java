@@ -13,6 +13,9 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
+import org.hibernate.annotations.Fetch;
+import org.hibernate.annotations.FetchMode;
+
 import mapper.ComputerMapper;
 
 @Entity
@@ -34,6 +37,7 @@ public class Computer {
     private LocalDate discontinued;
 
     @ManyToOne(fetch = FetchType.EAGER, cascade = CascadeType.DETACH)
+    @Fetch(FetchMode.SELECT)
     @JoinColumn(name = "company_id", nullable = true)
     private Company   company;
 

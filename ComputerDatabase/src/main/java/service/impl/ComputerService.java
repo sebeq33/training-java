@@ -51,7 +51,7 @@ public class ComputerService implements IComputerService {
     @Transactional(readOnly = true)
     public Computer getDetail(Long id) {
         Optional<Computer> one = computerDao.findById(id);
-//        Hibernate.initialize(one); //EAGER LOAD COMPANY ID
+//        Hibernate.initialize(one); //EAGER LOAD COMPANY ID GetOne
         return one.get();
     }
 
